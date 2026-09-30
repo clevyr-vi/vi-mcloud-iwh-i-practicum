@@ -5,4 +5,42 @@ html
         meta(name="viewport" content="width=device-width, initial-scale=1")
         link(rel="stylesheet", href="/css/style.css")
     body
+        form(action='/update-cobj' method='POST')
+            label(for='name') Name
+            input#name(type='text' name='name' required)
+
+            fieldset
+                legend Life Cycle
+                label
+                    input(type='radio' name='life_cycle' value='Annual')
+                    |  Annual
+                label
+                    input(type='radio' name='life_cycle' value='Perennial')
+                    |  Perennial
+                label
+                    input(type='radio' name='life_cycle' value='Biennial')
+                    |  Biennial
+
+            label(for='season') Season
+            select#season(name='season')
+                option(value='Spring') Spring
+                option(value='Summer') Summer
+                option(value='Autumn') Autumn
+
+            fieldset
+                legend Pollinators
+                label
+                    input(type='checkbox' name='pollinators' value='Bees')
+                    |  Bees
+                label
+                    input(type='checkbox' name='pollinators' value='Butterflies')
+                    |  Butterflies
+                label
+                    input(type='checkbox' name='pollinators' value='Hummingbirds')
+                    |  Hummingbirds
+                label
+                    input(type='checkbox' name='pollinators' value='Moths')
+                    |  Moths
+
+            button(type='submit') Save
         a(href="/") Return to the homepage
