@@ -17,6 +17,8 @@ if (!PRIVATE_APP_ACCESS || !OBJECT_TYPE_ID) {
     process.exit(1);
 }
 
+const toMultiCheckbox = (value) => [].concat(value || []).join(';');
+
 // TODO: ROUTE 1 - Create a new app.get route for the homepage to call your custom object data. Pass this data along to the front-end and create a new pug template in the views folder.
 
 // * Code for Route 1 goes here
@@ -35,7 +37,7 @@ app.post('/update-cobj', async (req, res) => {
             name: req.body.name,
             life_cycle: req.body.life_cycle,
             season: req.body.season,
-            pollinators: req.body.pollinators,
+            pollinators: toMultiCheckbox(req.body.pollinators),
         },
     };
     const headers = {
@@ -47,6 +49,7 @@ app.post('/update-cobj', async (req, res) => {
         res.redirect('/');
     } catch (error) {
         console.error(error.response?.data || error.message);
+        res.status(500).send('Could not save! Check the server log.');
     }
 });
 
