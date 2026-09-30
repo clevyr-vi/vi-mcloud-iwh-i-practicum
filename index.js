@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const app = express();
@@ -7,65 +8,56 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// * Please DO NOT INCLUDE the private app access token in your repo. Don't do this practicum in your normal account.
-const PRIVATE_APP_ACCESS = '';
+const PRIVATE_APP_ACCESS = process.env.PRIVATE_APP_ACCESS;
+const OBJECT_TYPE_ID = process.env.OBJECT_TYPE_ID;
 
-// TODO: ROUTE 1 - Create a new app.get route for the homepage to call your custom object data. Pass this data along to the front-end and create a new pug template in the views folder.
+if (!PRIVATE_APP_ACCESS || !OBJECT_TYPE_ID) {
+    console.error('[Error] Missing PRIVATE_APP_ACCESS or OBJECT_TYPE_ID in .env');
+    process.exit(1);
+}
 
-// * Code for Route 1 goes here
+const toMultiCheckbox = (value) => [].concat(value || []).join(';');
 
-// TODO: ROUTE 2 - Create a new app.get route for the form to create or update new custom object data. Send this data along in the next route.
-
-// * Code for Route 2 goes here
-
-// TODO: ROUTE 3 - Create a new app.post route for the custom objects form to create or update your custom object data. Once executed, redirect the user to the homepage.
-
-// * Code for Route 3 goes here
-
-/** 
-* * This is sample code to give you a reference for how you should structure your calls. 
-
-* * App.get sample
-app.get('/contacts', async (req, res) => {
-    const contacts = 'https://api.hubspot.com/crm/v3/objects/contacts';
-    const headers = {
-        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
-        'Content-Type': 'application/json'
-    }
+// * Homepage
+app.get('/', async (req, res) => {
+    const url = `https://api.hubapi.com/crm/v3/objects/${OBJECT_TYPE_ID}?properties=name,life_cycle,season,pollinators&limit=100`;
+    const headers = { Authorization: `Bearer ${PRIVATE_APP_ACCESS}` };
     try {
-        const resp = await axios.get(contacts, { headers });
-        const data = resp.data.results;
-        res.render('contacts', { title: 'Contacts | HubSpot APIs', data });      
+        const resp = await axios.get(url, { headers });
+        res.render('homepage', { title: 'Flower Seeds | Pollin8r', seeds: resp.data.results });
     } catch (error) {
-        console.error(error);
+        res.status(500).send('Could not load seeds.');
+        console.error(error.response?.data || error.message);
     }
 });
 
-* * App.post sample
-app.post('/update', async (req, res) => {
-    const update = {
-        properties: {
-            "favorite_book": req.body.newVal
-        }
-    }
+// * Create/Edit Form - GET
+app.get('/update-cobj', (req, res) => {
+    res.render('updates', { title: 'Update Custom Object Form | Integrating With HubSpot I Practicum' });
+});
 
-    const email = req.query.email;
-    const updateContact = `https://api.hubapi.com/crm/v3/objects/contacts/${email}?idProperty=email`;
+// * Create/Edit Form - POST
+app.post('/update-cobj', async (req, res) => {
+    const body = {
+        properties: {
+            name: req.body.name,
+            life_cycle: req.body.life_cycle,
+            season: req.body.season,
+            pollinators: toMultiCheckbox(req.body.pollinators),
+        },
+    };
     const headers = {
         Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
     };
-
-    try { 
-        await axios.patch(updateContact, update, { headers } );
-        res.redirect('back');
-    } catch(err) {
-        console.error(err);
+    try {
+        await axios.post(`https://api.hubapi.com/crm/v3/objects/${OBJECT_TYPE_ID}`, body, { headers });
+        res.redirect('/');
+    } catch (error) {
+        console.error(error.response?.data || error.message);
+        res.status(500).send('Could not save! Check the server log.');
     }
-
 });
-*/
-
 
 // * Localhost
 app.listen(3000, () => console.log('Listening on http://localhost:3000'));
