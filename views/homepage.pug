@@ -1,0 +1,18 @@
+extends layout
+
+block content
+    h1 Flower Seeds
+    table
+        thead
+            tr
+                th Name
+                th Life Cycle
+                th Season
+                th Pollinators
+        tbody
+            each seed in seeds
+                tr
+                    td= seed.properties.name
+                    td= seed.properties.life_cycle
+                    td= seed.properties.season
+                    td= seed.properties.pollinators
