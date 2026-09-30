@@ -16,4 +16,4 @@ block content
                     td= seed.properties.name
                     td= seed.properties.life_cycle
                     td= seed.properties.season
-                    td= seed.properties.pollinators
+                    td= (seed.properties.pollinators || '').split(';').join(', ')
